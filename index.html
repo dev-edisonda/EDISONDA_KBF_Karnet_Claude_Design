@@ -843,7 +843,7 @@
 
         <sc-if value="{{ tabMapa }}">
           <div style="display: flex; flex-direction: column; gap: 16px;">
-            <div style="position: relative; height: 520px; background: var(--bg-surface-alt); border: 1px solid var(--border-default); overflow: hidden;">
+            <div style="position: relative; isolation: isolate; height: 520px; background: var(--bg-surface-alt); border: 1px solid var(--border-default); overflow: hidden;">
               {{ mapEl }}
               <sc-if value="{{ mapPanelShow }}">
                 <div style="{{ mapPanelStyle }}">
@@ -1840,7 +1840,7 @@
 
         <sc-if value="{{ myTabMapa }}">
           <div style="display: flex; flex-direction: column; gap: 16px;">
-            <div style="position: relative; height: 520px; background: var(--bg-surface-alt); border: 1px solid var(--border-default); overflow: hidden;">
+            <div style="position: relative; isolation: isolate; height: 520px; background: var(--bg-surface-alt); border: 1px solid var(--border-default); overflow: hidden;">
               {{ myMapEl }}
               <sc-if value="{{ myMapPanelShow }}">
                 <div style="{{ mapPanelStyle }}">
