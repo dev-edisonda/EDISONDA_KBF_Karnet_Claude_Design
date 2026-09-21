@@ -850,52 +850,32 @@
                   <button onClick="{{ mapCloseSelected }}" aria-label="Zamknij" style="{{ mapCloseBtnStyle }}" style-hover="background: var(--ink-700); color: var(--white); border-color: var(--ink-700);">
                     {{ ic.filterRemoveX }}
                   </button>
-                  <sc-if value="{{ isMobile }}">
-                    <div style="{{ mapPanelScrollStyle }}">
-                      <sc-for list="{{ mapSelCards }}" as="mc" hint-placeholder-count="1">
-                        <div onClick="{{ mc.open }}" style="{{ mc.miniStyle }}">
-                          <button type="button" onClick="{{ mc.addStop }}" aria-label="{{ mc.miniHeartLabel }}" aria-pressed="{{ mc.saved }}" style="{{ mc.miniHeartStyle }}">{{ mc.miniHeartIcon }}</button>
-                          <span style="{{ mc.miniThumbStyle }}"></span>
-                          <span style="display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; padding: 8px 10px; text-align: left;">
-                            <span style="{{ mc.miniTagStyle }}">
-                              <span style="display: inline-flex; flex: 0 0 auto;">{{ mc.miniTagIcon }}</span>
-                              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ mc.categoryLabel }}</span>
-                            </span>
-                            <span style="font: var(--fw-bold) 14px/1.3 var(--font-body); color: var(--text-strong); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ mc.title }}</span>
-                            <span style="font: var(--fw-regular) 12px/1.35 var(--font-body); color: var(--text-accent); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">{{ mc.dateLine }}</span>
-                            <span style="font: var(--fw-regular) 12px/1.35 var(--font-body); color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">{{ mc.venue }}</span>
-                            <sc-if value="{{ mc.a11yHasAny }}" hint-placeholder-val="{{ false }}">
-                              <span style="display: flex; flex-wrap: wrap; gap: 4px; padding-top: 2px;">
-                                <sc-for list="{{ mc.miniA11yChips }}" as="ac" hint-placeholder-count="2">
-                                  <span title="{{ ac.title }}" style="{{ ac.style }}">{{ ac.icon }}</span>
-                                </sc-for>
-                              </span>
-                            </sc-if>
+                  <div data-rail="mapPanel" style="{{ mapPanelScrollStyle }}">
+                    <sc-for list="{{ mapSelCards }}" as="mc" hint-placeholder-count="1">
+                      <div onClick="{{ mc.open }}" style="{{ mc.miniStyle }}">
+                        <button type="button" onClick="{{ mc.addStop }}" aria-label="{{ mc.miniHeartLabel }}" aria-pressed="{{ mc.saved }}" style="{{ mc.miniHeartStyle }}">{{ mc.miniHeartIcon }}</button>
+                        <span style="{{ mc.miniThumbStyle }}"></span>
+                        <span style="display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; padding: 8px 10px; text-align: left;">
+                          <span style="{{ mc.miniTagStyle }}">
+                            <span style="display: inline-flex; flex: 0 0 auto;">{{ mc.miniTagIcon }}</span>
+                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ mc.categoryLabel }}</span>
                           </span>
-                        </div>
-                      </sc-for>
-                    </div>
-                  </sc-if>
-                  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
-                    <div style="{{ mapPanelScrollStyle }}">
-                      <sc-for list="{{ mapSelCards }}" as="mc" hint-placeholder-count="1">
-                        <x-import component="EventCardKarnet" from="./EventCardKarnet.jsx" size="sm" title="{{ mc.title }}" category="{{ mc.category }}" categoryLabel="{{ mc.categoryLabel }}" editors="{{ mc.editors }}" date="{{ mc.date }}" time="{{ mc.time }}" venue="{{ mc.venue }}" price="{{ mc.price }}" image="{{ mc.image }}" onAdd="{{ mc.add }}" saved="{{ mc.saved }}" onClick="{{ mc.open }}" a11y="{{ mc.a11yBadges }}" style="gap: 10px; padding-bottom: 12px;" hint-size="100%,300px"></x-import>
-                      </sc-for>
-                    </div>
-                  </sc-if>
+                          <span style="font: var(--fw-bold) 14px/1.3 var(--font-body); color: var(--text-strong); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ mc.title }}</span>
+                          <span style="font: var(--fw-regular) 12px/1.35 var(--font-body); color: var(--text-accent); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">{{ mc.dateLine }}</span>
+                          <span style="font: var(--fw-regular) 12px/1.35 var(--font-body); color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">{{ mc.venue }}</span>
+                          <sc-if value="{{ mc.a11yHasAny }}" hint-placeholder-val="{{ false }}">
+                            <span style="display: flex; flex-wrap: wrap; gap: 4px; padding-top: 2px;">
+                              <sc-for list="{{ mc.miniA11yChips }}" as="ac" hint-placeholder-count="2">
+                                <span title="{{ ac.title }}" style="{{ ac.style }}">{{ ac.icon }}</span>
+                              </sc-for>
+                            </span>
+                          </sc-if>
+                        </span>
+                      </div>
+                    </sc-for>
+                  </div>
                 </div>
               </sc-if>
-            </div>
-            <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px;">
-              <span style="font: var(--fw-regular) 20px/1.2 var(--font-display); color: var(--text-strong);">{{ mapListHeading }}</span>
-              <sc-if value="{{ mapListFiltered }}">
-                <button type="button" onClick="{{ mapListReset }}" style="border: 0; background: transparent; cursor: pointer; font: var(--type-button); color: var(--text-accent); text-decoration: underline; text-underline-offset: 3px; padding: 0;">Pokaż wszystkie w widoku mapy</button>
-              </sc-if>
-            </div>
-            <div style="{{ resultsGridStyle }}">
-              <sc-for list="{{ mapListCards }}" as="ev" hint-placeholder-count="6">
-                <x-import component="EventCardKarnet" from="./EventCardKarnet.jsx" size="sm" title="{{ ev.title }}" category="{{ ev.category }}" categoryLabel="{{ ev.categoryLabel }}" editors="{{ ev.editors }}" date="{{ ev.date }}" time="{{ ev.time }}" venue="{{ ev.venue }}" price="{{ ev.price }}" image="{{ ev.image }}" onAdd="{{ ev.add }}" saved="{{ ev.saved }}" onClick="{{ ev.open }}" a11y="{{ ev.a11yBadges }}" hint-size="100%,430px"></x-import>
-              </sc-for>
             </div>
           </div>
         </sc-if>
@@ -4222,22 +4202,15 @@ class Component extends DCLogic {
       onPage: p => { this.setState({ page: p }); if (typeof window !== 'undefined') window.scrollTo(0, 0); },
       hasResults: results.length > 0, noResults: results.length === 0,
       mapHasSelected: !!(s.mapCluster && s.mapCluster.length),
-      mapPanelShow: (s.mapCluster || []).length === 1,
+      mapPanelShow: !!(s.mapCluster && s.mapCluster.length),
       mapCloseBtnStyle: { position: 'absolute', zIndex: 4, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28,
-        border: '1px solid var(--border-default)', background: 'var(--white)', color: 'var(--text-strong)', cursor: 'pointer',
-        ...(s.mobile ? { top: 5, right: 5 } : { bottom: 6, right: 6 }) },
+        border: '1px solid var(--border-default)', background: 'var(--white)', color: 'var(--text-strong)', cursor: 'pointer', top: 5, right: 5 },
       mapSelCards: (s.mapCluster || []).map(id => E.find(x => x.id === id)).filter(Boolean).map(this.card),
       mapSelMulti: !!(s.mapCluster && s.mapCluster.length > 1),
       mapSelHeading: (s.mapCluster || []).length > 1 ? 'W tym miejscu: ' + s.mapCluster.length : 'Wybrane wydarzenie',
       mapCloseSelected: () => this.setState({ mapCluster: null }),
-      mapPanelStyle: s.mobile
-        ? { position: 'absolute', left: 10, right: 10, bottom: 10, zIndex: 500, display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-md)' }
-        : { position: 'absolute', left: 16, bottom: 16, width: 264, zIndex: 500, display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-md)' },
-      mapPanelScrollStyle: { display: 'flex', flexDirection: 'column' },
-      mapListHeading: 'Wydarzenia w widoku mapy (' + mapListEvents.length + ')',
-      mapListFiltered: false,
-      mapListReset: () => this.setState({ mapCluster: null }),
-      mapListCards: mapListEvents.map(this.card),
+      mapPanelStyle: { position: 'absolute', left: s.mobile ? 10 : 16, right: s.mobile ? 10 : 16, bottom: s.mobile ? 10 : 16, zIndex: 500, display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-md)' },
+      mapPanelScrollStyle: { display: 'grid', gridAutoFlow: 'column', gridAutoColumns: s.mobile ? '85%' : '240px', justifyContent: 'start', gap: 10, padding: 10, overflowX: 'auto', scrollBehavior: 'smooth', scrollbarWidth: 'none' },
       mapPins: mapListEvents.map((e, i) => ({
         key: e.id, title: e.title, venue: e.venue, category: e.category, categoryLabel: CAT_LABEL[e.category],
         date: [shortDate(e), e.time].filter(Boolean).join(', '),
