@@ -847,9 +847,6 @@
               {{ mapEl }}
               <sc-if value="{{ mapPanelShow }}">
                 <div style="{{ mapPanelStyle }}">
-                  <button onClick="{{ mapCloseSelected }}" aria-label="Zamknij" style="{{ mapCloseBtnStyle }}" style-hover="background: var(--ink-700); color: var(--white); border-color: var(--ink-700);">
-                    {{ ic.filterRemoveX }}
-                  </button>
                   <div data-rail="mapPanel" style="{{ mapPanelScrollStyle }}">
                     <sc-for list="{{ mapSelCards }}" as="mc" hint-placeholder-count="1">
                       <div onClick="{{ mc.open }}" style="{{ mc.miniStyle }}">
@@ -3234,6 +3231,7 @@ class Component extends DCLogic {
         const prev = this.state.mapVisibleIds || [];
         if (ids.join(',') !== prev.join(',')) this.setState({ mapVisibleIds: ids });
       });
+      this._map.on('click', () => { if (this.state.mapCluster) this.setState({ mapCluster: null }); });
     }
     setTimeout(() => this._map && this._map.invalidateSize(), 0);
     const events = this.filtered();
@@ -4208,9 +4206,8 @@ class Component extends DCLogic {
       mapSelCards: (s.mapCluster || []).map(id => E.find(x => x.id === id)).filter(Boolean).map(this.card),
       mapSelMulti: !!(s.mapCluster && s.mapCluster.length > 1),
       mapSelHeading: (s.mapCluster || []).length > 1 ? 'W tym miejscu: ' + s.mapCluster.length : 'Wybrane wydarzenie',
-      mapCloseSelected: () => this.setState({ mapCluster: null }),
-      mapPanelStyle: { position: 'absolute', left: s.mobile ? 10 : 16, right: s.mobile ? 10 : 16, bottom: s.mobile ? 10 : 16, zIndex: 500, display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-md)' },
-      mapPanelScrollStyle: { display: 'grid', gridAutoFlow: 'column', gridAutoColumns: s.mobile ? '85%' : '240px', justifyContent: 'start', gap: 10, padding: 10, overflowX: 'auto', scrollBehavior: 'smooth', scrollbarWidth: 'none' },
+      mapPanelStyle: { position: 'absolute', left: 0, right: 0, bottom: 14, zIndex: 500, display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-lg)' },
+      mapPanelScrollStyle: { display: 'grid', gridAutoFlow: 'column', gridAutoColumns: '240px', justifyContent: 'start', gap: 10, padding: '0 0 0 10px', overflowX: 'auto', scrollBehavior: 'smooth', scrollbarWidth: 'none' },
       mapPins: mapListEvents.map((e, i) => ({
         key: e.id, title: e.title, venue: e.venue, category: e.category, categoryLabel: CAT_LABEL[e.category],
         date: [shortDate(e), e.time].filter(Boolean).join(', '),
