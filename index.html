@@ -3851,12 +3851,8 @@ class Component extends DCLogic {
       }),
       mobFilterBtnStyle: { display: 'inline-flex', alignItems: 'center', gap: 8, flex: '1 1 0', minWidth: 0, minHeight: 48, padding: '0 12px', background: 'var(--white)', border: '1px solid var(--border-default)', color: 'var(--text-strong)', font: 'var(--fw-regular) 18px/1.2 var(--font-display)', cursor: 'pointer' },
       mobFilterBadgeStyle: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto', minWidth: 22, height: 22, padding: '0 6px', background: 'var(--accent)', color: 'var(--white)', font: 'var(--type-eyebrow)' },
-      catsPanelStyle: { display: 'none', flexDirection: 'column', gap: s.mobile ? 14 : 18, padding: s.mobile ? 16 : 20, background: 'var(--white)', border: s.mobile ? 0 : '1px solid var(--border-default)' },
-      filtersPanelStyle: !s.filtersDialog
-        ? { display: 'none' }
-        : (s.mobile
-          ? { position: 'fixed', zIndex: 400, left: 0, right: 0, bottom: 0, width: '100%', maxWidth: 430, margin: '0 auto', maxHeight: '86vh', display: 'flex', flexDirection: 'column', gap: 18, padding: '0 16px', background: 'var(--white)', borderTop: '2px solid var(--accent)', boxShadow: 'var(--shadow-lg)', overflowY: 'auto', overscrollBehavior: 'contain' }
-          : { position: 'fixed', zIndex: 400, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(760px, calc(100vw - 48px))', maxHeight: '86vh', display: 'flex', flexDirection: 'column', gap: 20, padding: '0 24px', background: 'var(--white)', border: '1px solid var(--accent)', boxShadow: 'var(--shadow-lg)', overflowY: 'auto' }),
+      catsPanelStyle: { display: 'flex', flexDirection: 'column', gap: s.mobile ? 14 : 18, padding: s.mobile ? 16 : 20, background: 'var(--white)', border: s.mobile ? 0 : '1px solid var(--border-default)' },
+      filtersPanelStyle: { display: 'flex', flexDirection: 'column', gap: s.mobile ? 18 : 20 },
       railAsideStyle: { display: 'contents' },
       filterHeading: s.mobile ? 'Filtry i sortowanie' : 'Filtry',
       railPanelStyle: { display: 'flex', flexDirection: 'column', gap: s.mobile ? 14 : 18, padding: s.mobile ? 16 : 20, background: 'var(--white)', border: '1px solid var(--border-default)' },
