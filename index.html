@@ -4207,7 +4207,7 @@ class Component extends DCLogic {
       mapSelMulti: !!(s.mapCluster && s.mapCluster.length > 1),
       mapSelHeading: (s.mapCluster || []).length > 1 ? 'W tym miejscu: ' + s.mapCluster.length : 'Wybrane wydarzenie',
       mapPanelStyle: { position: 'absolute', left: 0, right: 0, bottom: 14, zIndex: 500, display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-lg)' },
-      mapPanelScrollStyle: { display: 'grid', gridAutoFlow: 'column', gridAutoColumns: '240px', justifyContent: 'start', gap: 10, padding: '0 0 0 10px', overflowX: 'auto', scrollBehavior: 'smooth', scrollbarWidth: 'none' },
+      mapPanelScrollStyle: { display: 'grid', gridAutoFlow: 'column', gridAutoColumns: 'min(88%, 380px)', justifyContent: 'start', gap: 10, padding: '0 0 0 10px', overflowX: 'auto', scrollBehavior: 'smooth', scrollbarWidth: 'none' },
       mapPins: mapListEvents.map((e, i) => ({
         key: e.id, title: e.title, venue: e.venue, category: e.category, categoryLabel: CAT_LABEL[e.category],
         date: [shortDate(e), e.time].filter(Boolean).join(', '),
