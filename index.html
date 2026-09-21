@@ -595,6 +595,7 @@
                 </button>
               </sc-for>
             </div>
+            <button type="button" onClick="{{ clearFilters }}" style="align-self: flex-start; border: 0; background: transparent; cursor: pointer; font: var(--type-button); color: var(--text-accent); text-decoration: underline; text-underline-offset: 3px; padding: 2px 0;">Wyczyść wszystkie filtry</button>
           </div>
         </sc-if>
 
@@ -679,6 +680,16 @@
 
         <div style="display: flex; flex-direction: column; gap: 0;">
           <div style="box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 12px;"><span style="font: var(--type-label); color: var(--text-strong);">Dostępność</span><button type="button" onClick="{{ toggleAllA11yGroups }}" aria-expanded="{{ anyA11yGroupOpen }}" style="{{ descToggleStyle }}">{{ allA11yGroupsLabel }}{{ allA11yGroupsIcon }}</button></div>
+          <sc-if value="{{ a11yChipFilters.length }}">
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 12px;">
+              <sc-for list="{{ a11yChipFilters }}" as="ac" hint-placeholder-count="6">
+                <button type="button" onClick="{{ ac.toggle }}" aria-pressed="{{ ac.on }}" style="{{ ac.style }}">
+                  <span style="display: inline-flex; flex: 0 0 auto;">{{ ac.icon }}</span>
+                  {{ ac.label }}
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
           <sc-for list="{{ filterGroupsA11y }}" as="g" hint-placeholder-count="6">
             <div style="border-top: 1px solid var(--border-subtle);">
               <button onClick="{{ g.toggle }}" style="{{ g.headStyle }}">
@@ -3793,7 +3804,7 @@ class Component extends DCLogic {
       dialogApplyStyle: { flex: '1 1 auto', minHeight: 50, padding: '0 20px', background: 'var(--accent)', border: 0, color: 'var(--white)', font: 'var(--type-button)', cursor: 'pointer', transition: 'var(--transition-control)' },
       a11yChipFilters: A11Y.filter(a => !qStr || s.a11y.indexOf(a.key) > -1 || scoped.some(e => (e.a11y || []).indexOf(a.key) > -1)).map(a => {
         const on = s.a11y.indexOf(a.key) > -1;
-        return { key: a.key, label: a.label, on, icon: svgIcon(a.icon, 15),
+        return { key: a.key, label: (A11Y_INFO[a.key] || {}).short || a.label, on, icon: svgIcon(a.icon, 15),
           toggle: () => this.toggleIn('a11y', a.key),
           style: { display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 40, padding: '0 14px', background: on ? 'var(--accent)' : 'var(--white)', border: '1px solid ' + (on ? 'var(--accent)' : 'var(--border-default)'), color: on ? 'var(--white)' : 'var(--text-strong)', font: 'var(--type-body-sm)', cursor: 'pointer', transition: 'var(--transition-control)' } };
       }),
@@ -4336,7 +4347,7 @@ class Component extends DCLogic {
         return out;
       })(),
       quickChipsAny: (s.cats.length + (s.sub ? 1 : 0) + this.activeFilterList().filter(af => af.key !== 'free' && af.key !== 'editors' && af.key !== 'q').length) > 0,
-      clearFilters: () => this.setState({ q: '', qDraft: '', cats: [], sub: null, openCat: null, chip: null, page: 1, dateFrom: null, dateTo: null, district: DISTRICTS[0], freeOnly: false, editorsOnly: false, tags: [], venue: 'all', placeKinds: [], sort: 'data' }),
+      clearFilters: () => this.setState({ q: '', qDraft: '', cats: [], sub: null, openCat: null, chip: null, page: 1, dateFrom: null, dateTo: null, district: DISTRICTS[0], freeOnly: false, editorsOnly: false, tags: [], venue: 'all', placeKinds: [], audience: [], a11y: [], sort: 'data' }),
       railVisible: !!s.filtersDialog,
       catCount: String(s.cats.length + (s.sub ? 1 : 0)),
       catCountVisible: s.cats.length + (s.sub ? 1 : 0) > 0,
