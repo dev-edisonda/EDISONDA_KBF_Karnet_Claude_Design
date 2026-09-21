@@ -536,30 +536,6 @@
           <span style="font: var(--fw-regular) 23px/1.2 var(--font-display); letter-spacing: var(--ls-heading); color: var(--text-strong);">Filtry</span>
           <button onClick="{{ cancelFiltersDialog }}" aria-label="Zamknij" style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--border-default); background: var(--white); color: var(--text-strong); cursor: pointer;">{{ ic.sheetClose }}</button>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <span style="font: var(--type-label); color: var(--text-strong);">Kategorie</span>
-          <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
-            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-              <sc-for list="{{ catChipsDialog }}" as="cc" hint-placeholder-count="8">
-                <button onClick="{{ cc.toggle }}" aria-pressed="{{ cc.on }}" style="{{ cc.style }}">{{ cc.label }}</button>
-              </sc-for>
-            </div>
-          </sc-if>
-          <sc-if value="{{ isMobile }}">
-            <div style="{{ mobCatRowStyle }}">
-              <sc-for list="{{ catChipsMobile }}" as="cc" hint-placeholder-count="8">
-                <button onClick="{{ cc.toggle }}" aria-pressed="{{ cc.on }}" style="{{ cc.style }}">{{ cc.label }}</button>
-              </sc-for>
-            </div>
-          </sc-if>
-          <sc-if value="{{ subChipsVisible }}">
-            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-              <sc-for list="{{ subChipsDialog }}" as="sc" hint-placeholder-count="4">
-                <button onClick="{{ sc.pick }}" aria-pressed="{{ sc.on }}" style="{{ sc.style }}">{{ sc.label }}</button>
-              </sc-for>
-            </div>
-          </sc-if>
-        </div>
       <div style="{{ catsPanelStyle }}">
         <button onClick="{{ toggleCatsPanel }}" style="{{ panelHeadStyle }}">
           <span style="display: flex; flex-direction: column; gap: 4px; min-width: 0; text-align: left;">
@@ -3851,7 +3827,7 @@ class Component extends DCLogic {
       }),
       mobFilterBtnStyle: { display: 'inline-flex', alignItems: 'center', gap: 8, flex: '1 1 0', minWidth: 0, minHeight: 48, padding: '0 12px', background: 'var(--white)', border: '1px solid var(--border-default)', color: 'var(--text-strong)', font: 'var(--fw-regular) 18px/1.2 var(--font-display)', cursor: 'pointer' },
       mobFilterBadgeStyle: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto', minWidth: 22, height: 22, padding: '0 6px', background: 'var(--accent)', color: 'var(--white)', font: 'var(--type-eyebrow)' },
-      catsPanelStyle: { display: 'flex', flexDirection: 'column', gap: s.mobile ? 14 : 18, padding: s.mobile ? 16 : 20, background: 'var(--white)', border: s.mobile ? 0 : '1px solid var(--border-default)' },
+      catsPanelStyle: { display: 'flex', flexDirection: 'column', gap: s.mobile ? 14 : 18, padding: s.mobile ? 16 : 20, background: 'var(--white)' },
       filtersPanelStyle: { display: 'flex', flexDirection: 'column', gap: s.mobile ? 18 : 20 },
       railAsideStyle: { display: 'contents' },
       filterHeading: s.mobile ? 'Filtry i sortowanie' : 'Filtry',
