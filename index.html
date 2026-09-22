@@ -1077,6 +1077,13 @@
               </sc-if>
               <button type="button" onClick="{{ toggleHours }}" aria-expanded="{{ hoursOpen }}" style="{{ descToggleStyle }}">{{ hoursMoreLabel }}{{ hoursChevron }}</button>
             </div>
+            <sc-if value="{{ evExtraTagsAny }}">
+              <div style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px;">
+                <sc-for list="{{ evExtraTags }}" as="et" hint-placeholder-count="5">
+                  <span style="{{ et.style }}">{{ et.label }}</span>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </div>
         </sc-if>
@@ -3565,6 +3572,17 @@ class Component extends DCLogic {
     const ev = E.find(x => x.id === s.eventId) || E[0];
     const place = P.find(x => x.id === s.placeId) || P[0];
     const article = ARTICLES.find(x => x.id === s.articleId) || ARTICLES[0];
+    const evExtraTags = (() => {
+      // tagi TAG_GROUPS połączone z wydarzeniem, pomijając te już pokazane
+      // wprost w sekcji "Dostępność" (6 pozycji z A11Y) — patrz A11Y_TAG_DUPES
+      const tagVals = TAGS[ev.id] || [];
+      const a11yGroupVals = TAG_GROUPS.filter(g => g.a11y).reduce((acc, g) => acc.concat(g.items.map(it => it.v)), []);
+      const otherGroupVals = TAG_GROUPS.filter(g => !g.a11y).reduce((acc, g) => acc.concat(g.items.map(it => it.v)), []);
+      const A11Y_TAG_DUPES = ['hear:pjm', 'see:audio', 'hear:captions', 'hear:loop', 'sense:quiet', 'move:wheelchair'];
+      const extraA11y = tagVals.filter(t => a11yGroupVals.indexOf(t) > -1 && A11Y_TAG_DUPES.indexOf(t) < 0);
+      const extraOther = tagVals.filter(t => otherGroupVals.indexOf(t) > -1);
+      return extraA11y.concat(extraOther).map(t => ({ key: t, label: TAG_LABEL[t] || t }));
+    })();
     const myList = this.mySaved();
     const inSet = (list, ids) => ids ? list.filter(e => ids.indexOf(e.id) > -1) : list;
     const mapListEvents = inSet(results, s.mapVisibleIds);
@@ -4770,6 +4788,9 @@ class Component extends DCLogic {
         { key: 'park', label: 'Parking', value: ev.district === 'Stare Miasto' ? 'strefa płatna, bez miejsc na miejscu' : 'miejsca przy obiekcie', icon: svgIcon('map', 18) },
         { key: 'open', label: 'Wejście / kasa', value: ev.free ? 'wejście bez biletu, bez rezerwacji' : 'kasa otwarta godzinę przed', icon: svgIcon('ticket', 18) }
       ],
+      evExtraTags: evExtraTags.map(t => ({ key: t.key, label: t.label,
+        style: { display: 'inline-flex', alignItems: 'center', minHeight: 32, padding: '0 12px', background: 'var(--bg-surface-alt)', border: '1px solid var(--border-default)', color: 'var(--text-body)', font: 'var(--type-body-sm)' } })),
+      evExtraTagsAny: evExtraTags.length > 0,
       evArticles: ARTICLES.filter(a => (a.relEvents || []).indexOf(ev.id) > -1).map(a => ({
         id: a.id, title: a.title, kindUp: a.kind.toUpperCase(), lead: a.lead,
         meta: a.date + ' · ' + a.author,
