@@ -3684,7 +3684,7 @@ class Component extends DCLogic {
       if (s.sub && subsOf(e).indexOf(s.sub) < 0) return false;
       return true;
     });
-    const fCount = (s.q ? 1 : 0) + (s.chip ? 1 : 0) + (s.dateFrom ? 1 : 0)
+    const fCount = (s.q ? 1 : 0) + (s.chip ? 1 : 0) + (s.dateFrom ? 1 : 0) + s.cats.length + (s.sub ? 1 : 0)
       + (s.district !== DISTRICTS[0] ? 1 : 0) + (s.freeOnly ? 1 : 0) + (s.editorsOnly ? 1 : 0)
       + s.tags.length + (s.venue !== 'all' ? 1 : 0) + s.placeKinds.length + s.audience.length + s.a11y.length;
 
@@ -4409,11 +4409,12 @@ class Component extends DCLogic {
         const push = (key, label, remove) => out.push({
           key, label, remove: e => { if (e && e.preventDefault) e.preventDefault(); remove(); },
           style: { display: 'inline-flex', alignItems: 'center', gap: 6, flex: '0 0 auto', whiteSpace: 'nowrap', minHeight: 40,
-            padding: '0 10px 0 14px', background: 'var(--rose-100)', border: '1px solid var(--accent)', color: 'var(--rose-700)',
+            padding: '0 10px 0 14px', background: 'var(--rose-100)', border: '1px solid var(--text-accent)', color: 'var(--rose-700)',
             font: 'var(--type-body-sm)', cursor: 'pointer', transition: 'var(--transition-control)' },
           icon: svgIcon('x', 15)
         });
-        s.cats.forEach(c => push('cat-' + c, CAT_LABEL[c] || c, () => this.setState({ cats: s.cats.filter(v => v !== c), sub: null, openCat: null })));
+        // 'theatre' already has its own "Spektakle" quick-toggle button — skip its chip to avoid showing it twice
+        s.cats.filter(c => c !== 'theatre').forEach(c => push('cat-' + c, CAT_LABEL[c] || c, () => this.setState({ cats: s.cats.filter(v => v !== c), sub: null, openCat: null })));
         if (s.sub) push('sub', s.sub, () => this.setState({ sub: null }));
         this.activeFilterList().forEach(af => { if (!skip[af.key]) push(af.key, af.label, af.remove); });
         return out;
@@ -4807,7 +4808,13 @@ class Component extends DCLogic {
         const base = qScoped.filter(e => !s.cats.length || catsOf(e).some(c => s.cats.indexOf(c) > -1));
         const defs = [
           { key: 'editors', label: 'Polecane przez redakcję', on: s.editorsOnly, match: e => e.editors, toggle: () => this.setState({ editorsOnly: !s.editorsOnly, page: 1 }) },
-          { key: 'free', label: 'Wstęp wolny', on: s.freeOnly, match: e => e.free, toggle: () => this.setState({ freeOnly: !s.freeOnly, page: 1 }) }
+          { key: 'free', label: 'Wstęp wolny', on: s.freeOnly, match: e => e.free, toggle: () => this.setState({ freeOnly: !s.freeOnly, page: 1 }) },
+          { key: 'theatre', label: 'Spektakle', on: s.cats.indexOf('theatre') > -1, match: e => catsOf(e).indexOf('theatre') > -1,
+            toggle: () => this.setState(s.cats.indexOf('theatre') > -1
+              ? { cats: [], sub: null, openCat: null, page: 1 }
+              : { cats: ['theatre'], sub: null, openCat: 'theatre', chip: null, page: 1 }) },
+          { key: 'dzieci', label: 'Dla dzieci', on: s.audience.indexOf('dzieci') > -1, match: e => (e.audience || []).indexOf('dzieci') > -1,
+            toggle: () => this.setState({ audience: s.audience.indexOf('dzieci') > -1 ? s.audience.filter(a => a !== 'dzieci') : s.audience.concat(['dzieci']), page: 1 }) }
         ];
         return defs.map(d => ({
           key: d.key, label: d.label, on: d.on, count: base.filter(d.match).length,
@@ -4829,7 +4836,9 @@ class Component extends DCLogic {
         ? { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%' }
         : { display: 'flex', alignItems: 'center', gap: 16, flex: '0 0 auto' },
       quickClearStyle: { display: 'inline-flex', alignItems: 'center', minHeight: 40, padding: '0 8px', border: 0, background: 'transparent', color: 'var(--text-accent)', font: 'var(--type-button)', whiteSpace: 'nowrap', cursor: 'pointer' },
-      allFiltersBtnStyle: { display: 'inline-flex', alignItems: 'center', gap: 8, flex: '0 0 auto', minHeight: 40, padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-strong)', color: 'var(--text-strong)', font: 'var(--type-button)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'var(--transition-control)' },
+      allFiltersBtnStyle: (s.mobile && !fCount)
+        ? { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', minHeight: 40, padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-strong)', color: 'var(--text-strong)', font: 'var(--type-button)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'var(--transition-control)' }
+        : { display: 'inline-flex', alignItems: 'center', gap: 8, flex: '0 0 auto', minHeight: 40, padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-strong)', color: 'var(--text-strong)', font: 'var(--type-button)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'var(--transition-control)' },
       wideActionBtnStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 48, padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-strong)', color: 'var(--text-strong)', font: 'var(--type-button)', cursor: 'pointer', transition: 'var(--transition-control)' },
       mobCatRowStyle: { display: 'flex', flexWrap: 'nowrap', gap: 6, overflowX: 'auto', overflowY: 'hidden', margin: '0 -16px', padding: '0 16px 2px', scrollbarWidth: 'none' },
       catChipsDialog: CATS.map(c => {
