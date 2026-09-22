@@ -1314,6 +1314,17 @@
         </a>
       </sc-for>
     </div>
+    <sc-if value="{{ placeShowPagination }}">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <span style="font: var(--type-label); color: var(--text-strong); white-space: nowrap;">Strona:</span>
+        <sc-if value="{{ placeHasPrevPage }}">
+          <x-import component-from-global-scope="KarnetKrakWDesignSystem_fd72fb.Button" variant="secondary" size="sm" iconLeft="arrow-left" onClick="{{ onPlacePrevPage }}" hint-size="auto,40px">Poprzednie</x-import>
+        </sc-if>
+        <span style="flex: 1 1 320px; min-width: 240px;">
+          <x-import component-from-global-scope="KarnetKrakWDesignSystem_fd72fb.Pagination" page="{{ placePage }}" pageCount="{{ placePageCount }}" onChange="{{ onPlacePage }}" hint-size="100%,50px"></x-import>
+        </span>
+      </div>
+    </sc-if>
     <sc-if value="{{ placesEmpty }}">
       <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 40px; background: var(--white); border: 1px solid var(--border-default);">
         <span style="display: inline-flex; color: var(--accent);">{{ ic.placesEmpty }}</span>
@@ -2863,7 +2874,7 @@ class Component extends DCLogic {
   state = {
     route: 'home', eventId: null, placeId: null,
     editorsOnly: false, catsPanel: false, filtersPanel: false, mobSheet: null, filtersDialog: false, filtersSnap: null, pdfView: null, mobile: false, mobNav: 'hamburger', heroIndex: 0, mobMenuOpen: false, mobSearchOpen: false, railPos: {}, pastShowsOpen: false,
-    tab: 'lista', kontoTab: 'wydarzenia', placeKind: null, myPlaceKind: null, placeKinds: [], placeSort: 'az', placeDistrict: DISTRICTS[0],
+    tab: 'lista', kontoTab: 'wydarzenia', placeKind: null, myPlaceKind: null, placeKinds: [], placeSort: 'az', placeDistrict: DISTRICTS[0], placePage: 1,
     sugOpen: null,
     q: '', qDraft: '', cats: [], sub: null, openCat: null, chip: null, page: 1, mapCluster: null, mapVisibleIds: null, myMapCluster: null, myMapVisibleIds: null, district: DISTRICTS[0], freeOnly: false,
     audience: [], a11y: [], venue: 'all', sort: 'data',
@@ -3074,7 +3085,8 @@ class Component extends DCLogic {
     const leftPlaces = (from === 'places' || from === 'place') && route !== 'places' && route !== 'place';
     const clear = {
       ...(leftEvents ? { ...this.baseFilterReset(), sort: 'data', mapCluster: null, mapVisibleIds: null, calOpen: false, calPick: null, openGroups: {}, tab: 'lista' } : null),
-      ...(leftPlaces ? { placeKind: null, placeKinds: [], placeSort: 'az', placeDistrict: DISTRICTS[0] } : null)
+      ...(leftPlaces ? { placeKind: null, placeKinds: [], placeSort: 'az', placeDistrict: DISTRICTS[0], placePage: 1 } : null),
+      ...(route === 'places' ? { placePage: 1 } : null)
     };
     this.setState({ route, filtersOpen: false, showsOpen: false, pastShowsOpen: false, ...clear, ...(reset || {}), ...(extra || {}) }, () => this.pushHistory());
     if (typeof window !== 'undefined') window.scrollTo(0, 0);
@@ -4644,9 +4656,16 @@ class Component extends DCLogic {
 
       // places
       placeKindLabel: s.placeKind ? (PLACE_KINDS.find(k => k.key === s.placeKind) || {}).label : 'Wszystkie miejsca',
-      placeList, placeCount: placeList.length,
+      placeCount: placeList.length,
       placesEmpty: placeList.length === 0,
-      clearPlaceFilters: () => this.setState({ placeKind: null, placeKinds: [], placeDistrict: DISTRICTS[0] }),
+      placeList: placeList.slice((Math.min(s.placePage || 1, Math.max(1, Math.ceil(placeList.length / 12))) - 1) * 12, Math.min(s.placePage || 1, Math.max(1, Math.ceil(placeList.length / 12))) * 12),
+      placePage: Math.min(s.placePage || 1, Math.max(1, Math.ceil(placeList.length / 12))),
+      placePageCount: Math.max(1, Math.ceil(placeList.length / 12)),
+      placeShowPagination: placeList.length > 12,
+      placeHasPrevPage: (s.placePage || 1) > 1,
+      onPlacePrevPage: () => this.setState({ placePage: Math.max(1, (s.placePage || 1) - 1) }),
+      onPlacePage: p => { this.setState({ placePage: p }); if (typeof window !== 'undefined') window.scrollTo(0, 0); },
+      clearPlaceFilters: () => this.setState({ placeKind: null, placeKinds: [], placeDistrict: DISTRICTS[0], placePage: 1 }),
       placeSaveLabels: { add: 'Dodaj do ulubionych miejsc', saved: 'W ulubionych miejscach', remove: 'Usuń z ulubionych miejsc' },
       clearPlaceKind: () => this.setState({ placeKind: null }),
       place: { name: place.name, address: place.address, about: place.about, transport: place.transport, district: place.district, kindLabel: (PLACE_KINDS.find(k => k.key === place.kind) || {}).label },
@@ -4691,10 +4710,10 @@ class Component extends DCLogic {
       placeEvents: E.filter(e => atVenue(e, place.id)).slice().sort((a, b) => (a.start || '').localeCompare(b.start || '') || (a.time || '').localeCompare(b.time || '')).map(this.card),
       placeSortOptions: [{ value: 'az', label: 'Alfabetycznie (A–Z)' }, { value: 'za', label: 'Alfabetycznie (Z–A)' }],
       placeSort: s.placeSort,
-      onPlaceSort: e => this.setState({ placeSort: e.target.value }),
+      onPlaceSort: e => this.setState({ placeSort: e.target.value, placePage: 1 }),
       placeDistrictOptions: [DISTRICTS[0], KRK_ALL].concat(DISTRICTS.slice(1)).map(d => ({ value: d, label: distLabel(d) })),
       placeDistrict: s.placeDistrict,
-      onPlaceDistrict: e => this.setState({ placeDistrict: e.target.value }),
+      onPlaceDistrict: e => this.setState({ placeDistrict: e.target.value, placePage: 1 }),
       placeFilterRowStyle: s.mobile
         ? { display: 'flex', flexWrap: 'nowrap', alignItems: 'flex-end', gap: 8, minWidth: 0, '--fs-base': '13px', '--fs-sm': '12px' }
         : { display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: 12 },
