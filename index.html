@@ -752,38 +752,35 @@
       <!-- results -->
       <div style="flex: 1 1 480px; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
         <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--white); border: 1px solid var(--border-default);">
-          <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px;">
-            <span style="font: var(--fw-regular) 18px/1.2 var(--font-display); color: var(--text-strong);">Szybkie filtry</span>
-            
-          </div>
+          <span style="font: var(--fw-regular) 18px/1.2 var(--font-display); color: var(--text-strong);">Filtry</span>
           <div style="{{ quickWrapStyle }}">
             <div style="{{ quickRowStyle }}">
-              <sc-for list="{{ quickFilters }}" as="qf" hint-placeholder-count="2">
-                <button onClick="{{ qf.toggle }}" aria-pressed="{{ qf.on }}" style="{{ qf.style }}">
-                  {{ qf.label }}
-                  <span style="opacity: .7;">{{ qf.count }}</span>
-                </button>
-              </sc-for>
-            </div>
-            <button onClick="{{ openFiltersDialog }}" style="{{ allFiltersBtnStyle }}">
-              {{ ic.mobFilter }}
-              Wszystkie filtry
-              <sc-if value="{{ filterCountVisible }}">
-                <span style="{{ mobFilterBadgeStyle }}">{{ filterCount }}</span>
-              </sc-if>
-            </button>
-          </div>
-          <sc-if value="{{ quickChipsAny }}">
-            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
               <sc-for list="{{ quickChips }}" as="qc" hint-placeholder-count="2">
                 <button onClick="{{ qc.remove }}" aria-label="Usuń filtr" style="{{ qc.style }}">
                   <span style="min-width: 0; overflow-wrap: anywhere;">{{ qc.label }}</span>
                   <span style="display: inline-flex; flex: 0 0 auto;">{{ qc.icon }}</span>
                 </button>
               </sc-for>
+              <sc-for list="{{ quickFilters }}" as="qf" hint-placeholder-count="2">
+                <button onClick="{{ qf.toggle }}" aria-pressed="{{ qf.on }}" style="{{ qf.style }}">
+                  {{ qf.label }}
+                  <span style="{{ qf.countStyle }}">{{ qf.count }}</span>
+                </button>
+              </sc-for>
             </div>
-            <button type="button" onClick="{{ clearFilters }}" style="align-self: flex-start; border: 0; background: transparent; cursor: pointer; font: var(--type-button); color: var(--text-accent); text-decoration: underline; text-underline-offset: 3px; padding: 2px 0;">Wyczyść wszystkie filtry</button>
-          </sc-if>
+            <div style="{{ filtersBoxActionsStyle }}">
+              <sc-if value="{{ filterCountVisible }}">
+                <button type="button" onClick="{{ clearFilters }}" style="{{ quickClearStyle }}">Wyczyść wszystkie filtry</button>
+              </sc-if>
+              <button onClick="{{ openFiltersDialog }}" style="{{ allFiltersBtnStyle }}">
+                {{ ic.mobFilter }}
+                Wszystkie filtry
+                <sc-if value="{{ filterCountVisible }}">
+                  <span style="{{ mobFilterBadgeStyle }}">{{ filterCount }}</span>
+                </sc-if>
+              </button>
+            </div>
+          </div>
         </div>
         <sc-if value="{{ tabListaResults }}" hint-placeholder-val="{{ true }}">
           <div style="{{ resultsGridStyle }}">
@@ -3891,7 +3888,7 @@ class Component extends DCLogic {
           style: { display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 40, padding: '0 14px', background: on ? 'var(--accent)' : 'var(--white)', border: '1px solid ' + (on ? 'var(--accent)' : 'var(--border-default)'), color: on ? 'var(--white)' : 'var(--text-strong)', font: 'var(--type-body-sm)', cursor: 'pointer', transition: 'var(--transition-control)' } };
       }),
       mobFilterBtnStyle: { display: 'inline-flex', alignItems: 'center', gap: 8, flex: '1 1 0', minWidth: 0, minHeight: 48, padding: '0 12px', background: 'var(--white)', border: '1px solid var(--border-default)', color: 'var(--text-strong)', font: 'var(--fw-regular) 18px/1.2 var(--font-display)', cursor: 'pointer' },
-      mobFilterBadgeStyle: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto', minWidth: 22, height: 22, padding: '0 6px', background: 'var(--accent)', color: 'var(--white)', font: 'var(--type-eyebrow)' },
+      mobFilterBadgeStyle: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto', minWidth: 22, height: 22, padding: '0 6px', background: 'var(--text-accent)', color: 'var(--white)', font: 'var(--type-eyebrow)' },
       catsPanelStyle: { display: 'flex', flexDirection: 'column', gap: s.mobile ? 14 : 18, padding: s.mobile ? 16 : 20, background: 'var(--white)' },
       filtersPanelStyle: { display: 'flex', flexDirection: 'column', gap: s.mobile ? 18 : 20 },
       railAsideStyle: { display: 'contents' },
@@ -4421,7 +4418,6 @@ class Component extends DCLogic {
         this.activeFilterList().forEach(af => { if (!skip[af.key]) push(af.key, af.label, af.remove); });
         return out;
       })(),
-      quickChipsAny: (s.cats.length + (s.sub ? 1 : 0) + this.activeFilterList().filter(af => af.key !== 'free' && af.key !== 'editors' && af.key !== 'q').length) > 0,
       clearFilters: () => this.setState({ q: '', qDraft: '', cats: [], sub: null, openCat: null, chip: null, page: 1, dateFrom: null, dateTo: null, district: DISTRICTS[0], freeOnly: false, editorsOnly: false, tags: [], venue: 'all', placeKinds: [], audience: [], a11y: [], sort: 'data' }),
       railVisible: !!s.filtersDialog,
       catCount: String(s.cats.length + (s.sub ? 1 : 0)),
@@ -4816,7 +4812,10 @@ class Component extends DCLogic {
         return defs.map(d => ({
           key: d.key, label: d.label, on: d.on, count: base.filter(d.match).length,
           toggle: d.toggle,
-          style: { ...chipStyle(d.on), display: 'inline-flex', alignItems: 'center', gap: 8, flex: '0 0 auto', whiteSpace: 'nowrap' }
+          style: { display: 'inline-flex', alignItems: 'center', gap: 8, flex: '0 0 auto', whiteSpace: 'nowrap', height: 40, padding: '0 18px',
+            background: d.on ? 'var(--rose-100)' : 'var(--white)', border: '1px solid ' + (d.on ? 'var(--text-accent)' : 'var(--border-default)'),
+            color: d.on ? 'var(--text-accent)' : 'var(--text-body)', font: 'var(--type-body-sm)', cursor: 'pointer', transition: 'var(--transition-control)' },
+          countStyle: { opacity: d.on ? 1 : .7 }
         }));
       })(),
 
@@ -4825,10 +4824,12 @@ class Component extends DCLogic {
         : { display: 'flex', flexWrap: 'wrap', gap: 6, flex: '1 1 auto', minWidth: 0 },
       quickWrapStyle: s.mobile
         ? { display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }
-        : { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 },
-      allFiltersBtnStyle: s.mobile
-        ? { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', minHeight: 48, padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-strong)', color: 'var(--text-strong)', font: 'var(--type-button)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'var(--transition-control)' }
-        : { display: 'inline-flex', alignItems: 'center', gap: 8, flex: '0 0 auto', minHeight: 40, padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-strong)', color: 'var(--text-strong)', font: 'var(--type-button)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'var(--transition-control)' },
+        : { display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '10px 8px', minWidth: 0 },
+      filtersBoxActionsStyle: s.mobile
+        ? { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%' }
+        : { display: 'flex', alignItems: 'center', gap: 16, flex: '0 0 auto' },
+      quickClearStyle: { display: 'inline-flex', alignItems: 'center', minHeight: 40, padding: '0 8px', border: 0, background: 'transparent', color: 'var(--text-accent)', font: 'var(--type-button)', whiteSpace: 'nowrap', cursor: 'pointer' },
+      allFiltersBtnStyle: { display: 'inline-flex', alignItems: 'center', gap: 8, flex: '0 0 auto', minHeight: 40, padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-strong)', color: 'var(--text-strong)', font: 'var(--type-button)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'var(--transition-control)' },
       wideActionBtnStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 48, padding: '0 14px', background: 'var(--white)', border: '1px solid var(--border-strong)', color: 'var(--text-strong)', font: 'var(--type-button)', cursor: 'pointer', transition: 'var(--transition-control)' },
       mobCatRowStyle: { display: 'flex', flexWrap: 'nowrap', gap: 6, overflowX: 'auto', overflowY: 'hidden', margin: '0 -16px', padding: '0 16px 2px', scrollbarWidth: 'none' },
       catChipsDialog: CATS.map(c => {
