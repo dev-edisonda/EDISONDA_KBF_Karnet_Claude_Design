@@ -1031,10 +1031,16 @@
             </sc-for>
           </div>
           <sc-if value="{{ evA11yExtraTagsAny }}">
-            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-              <sc-for list="{{ evA11yExtraTags }}" as="et" hint-placeholder-count="5">
-                <span style="{{ et.style }}">{{ et.label }}</span>
-              </sc-for>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font: var(--type-label); color: var(--text-strong);">Tagi</span>
+              <div ref="{{ evA11yTagsRef }}" style="{{ evA11yTagsRowStyle }}">
+                <sc-for list="{{ evA11yExtraTags }}" as="et" hint-placeholder-count="5">
+                  <span style="{{ et.style }}">{{ et.label }}</span>
+                </sc-for>
+              </div>
+              <sc-if value="{{ evA11yTagsNeedsToggle }}">
+                <button type="button" onClick="{{ toggleEvA11yTags }}" aria-expanded="{{ evA11yTagsExpandedFlag }}" style="{{ descToggleStyle }}">{{ evA11yTagsToggleLabel }}{{ evA11yTagsToggleIcon }}</button>
+              </sc-if>
             </div>
           </sc-if>
           <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">
@@ -1085,10 +1091,16 @@
               <button type="button" onClick="{{ toggleHours }}" aria-expanded="{{ hoursOpen }}" style="{{ descToggleStyle }}">{{ hoursMoreLabel }}{{ hoursChevron }}</button>
             </div>
             <sc-if value="{{ evOtherExtraTagsAny }}">
-              <div style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px;">
-                <sc-for list="{{ evOtherExtraTags }}" as="et" hint-placeholder-count="5">
-                  <span style="{{ et.style }}">{{ et.label }}</span>
-                </sc-for>
+              <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px;">
+                <span style="font: var(--type-label); color: var(--text-strong);">Tagi</span>
+                <div ref="{{ evOtherTagsRef }}" style="{{ evOtherTagsRowStyle }}">
+                  <sc-for list="{{ evOtherExtraTags }}" as="et" hint-placeholder-count="5">
+                    <span style="{{ et.style }}">{{ et.label }}</span>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ evOtherTagsNeedsToggle }}">
+                  <button type="button" onClick="{{ toggleEvOtherTags }}" aria-expanded="{{ evOtherTagsExpandedFlag }}" style="{{ descToggleStyle }}">{{ evOtherTagsToggleLabel }}{{ evOtherTagsToggleIcon }}</button>
+                </sc-if>
               </div>
             </sc-if>
           </div>
@@ -3067,7 +3079,8 @@ class Component extends DCLogic {
     this.setState({ route, filtersOpen: false, showsOpen: false, pastShowsOpen: false, ...clear, ...(reset || {}), ...(extra || {}) }, () => this.pushHistory());
     if (typeof window !== 'undefined') window.scrollTo(0, 0);
   };
-  openEvent = id => this.go('event', { eventId: id, descExpanded: false, descOverflow: false, a11yHelp: null });
+  openEvent = id => this.go('event', { eventId: id, descExpanded: false, descOverflow: false, a11yHelp: null,
+    evA11yTagsExpanded: false, evA11yTagsOverflow: false, evOtherTagsExpanded: false, evOtherTagsOverflow: false });
   openPlace = id => this.go('place', { placeId: id });
 
   toggleIn(key, val) {
@@ -3295,6 +3308,21 @@ class Component extends DCLogic {
     if (over !== !!this.state.descOverflow) this.setState({ descOverflow: over });
   };
 
+  evA11yTagsRef = React.createRef();
+  evOtherTagsRef = React.createRef();
+
+  measureTagRows = () => {
+    const check = (ref, overflowKey, expandedKey) => {
+      const el = ref.current;
+      if (!el) { if (this.state[overflowKey]) this.setState({ [overflowKey]: false }); return; }
+      if (this.state[expandedKey]) return;
+      const over = el.scrollWidth - el.clientWidth > 2;
+      if (over !== !!this.state[overflowKey]) this.setState({ [overflowKey]: over });
+    };
+    check(this.evA11yTagsRef, 'evA11yTagsOverflow', 'evA11yTagsExpanded');
+    check(this.evOtherTagsRef, 'evOtherTagsOverflow', 'evOtherTagsExpanded');
+  };
+
   onDocDown = e => {
     if (this.state.a11yHelp && !(e.target.closest && e.target.closest('[data-a11y-help]'))) this.setState({ a11yHelp: null });
     if (!this.state.calOpen) return;
@@ -3305,8 +3333,10 @@ class Component extends DCLogic {
   componentDidMount() {
     this.syncMap(); this.syncPlaceMap(); this.syncMyMap(); this.syncEventMap();
     this.measureDesc();
+    this.measureTagRows();
     document.addEventListener('pointerdown', this.onDocDown, true);
     window.addEventListener('resize', this.measureDesc);
+    window.addEventListener('resize', this.measureTagRows);
     if (window.history) {
       try { window.history.replaceState({ karnetNav: this.navSnapshot() }, ''); } catch (e) {}
       window.addEventListener('popstate', this.onPopState);
@@ -3316,11 +3346,13 @@ class Component extends DCLogic {
   componentWillUnmount() {
     document.removeEventListener('pointerdown', this.onDocDown, true);
     window.removeEventListener('resize', this.measureDesc);
+    window.removeEventListener('resize', this.measureTagRows);
     window.removeEventListener('popstate', this.onPopState);
   }
 
   componentDidUpdate() {
     this.measureDesc();
+    this.measureTagRows();
     this.syncMap();
     this.syncPlaceMap();
     this.syncMyMap();
@@ -3579,7 +3611,7 @@ class Component extends DCLogic {
     const ev = E.find(x => x.id === s.eventId) || E[0];
     const place = P.find(x => x.id === s.placeId) || P[0];
     const article = ARTICLES.find(x => x.id === s.articleId) || ARTICLES[0];
-    const extraTagStyle = { display: 'inline-flex', alignItems: 'center', minHeight: 24, padding: '0 9px', background: 'var(--bg-surface-alt)', border: '1px solid var(--border-default)', color: 'var(--text-body)', font: 'var(--type-meta)' };
+    const extraTagStyle = { display: 'inline-flex', alignItems: 'center', flex: '0 0 auto', whiteSpace: 'nowrap', minHeight: 24, padding: '0 9px', background: 'var(--bg-surface-alt)', border: '1px solid var(--border-default)', color: 'var(--text-body)', font: 'var(--type-meta)' };
     const evExtraTagSplit = (() => {
       // tagi TAG_GROUPS połączone z wydarzeniem, pomijając te już pokazane
       // wprost w sekcji "Dostępność" (6 pozycji z A11Y) — patrz A11Y_TAG_DUPES
@@ -4799,8 +4831,26 @@ class Component extends DCLogic {
       ],
       evA11yExtraTags: evExtraTagSplit.a11y.map(t => ({ key: t.key, label: t.label, style: extraTagStyle })),
       evA11yExtraTagsAny: evExtraTagSplit.a11y.length > 0,
+      evA11yTagsRef: this.evA11yTagsRef,
+      evA11yTagsRowStyle: s.evA11yTagsExpanded
+        ? { display: 'flex', flexWrap: 'wrap', gap: 6 }
+        : { display: 'flex', flexWrap: 'nowrap', overflow: 'hidden', gap: 6 },
+      evA11yTagsNeedsToggle: !!s.evA11yTagsOverflow || !!s.evA11yTagsExpanded,
+      evA11yTagsExpandedFlag: !!s.evA11yTagsExpanded,
+      evA11yTagsToggleLabel: s.evA11yTagsExpanded ? 'Zwiń' : 'Rozwiń',
+      evA11yTagsToggleIcon: svgIcon(s.evA11yTagsExpanded ? 'chevron-up' : 'chevron-down', 18),
+      toggleEvA11yTags: e => { if (e && e.preventDefault) e.preventDefault(); this.setState(p => ({ evA11yTagsExpanded: !p.evA11yTagsExpanded })); },
       evOtherExtraTags: evExtraTagSplit.other.map(t => ({ key: t.key, label: t.label, style: extraTagStyle })),
       evOtherExtraTagsAny: evExtraTagSplit.other.length > 0,
+      evOtherTagsRef: this.evOtherTagsRef,
+      evOtherTagsRowStyle: s.evOtherTagsExpanded
+        ? { display: 'flex', flexWrap: 'wrap', gap: 6 }
+        : { display: 'flex', flexWrap: 'nowrap', overflow: 'hidden', gap: 6 },
+      evOtherTagsNeedsToggle: !!s.evOtherTagsOverflow || !!s.evOtherTagsExpanded,
+      evOtherTagsExpandedFlag: !!s.evOtherTagsExpanded,
+      evOtherTagsToggleLabel: s.evOtherTagsExpanded ? 'Zwiń' : 'Rozwiń',
+      evOtherTagsToggleIcon: svgIcon(s.evOtherTagsExpanded ? 'chevron-up' : 'chevron-down', 18),
+      toggleEvOtherTags: e => { if (e && e.preventDefault) e.preventDefault(); this.setState(p => ({ evOtherTagsExpanded: !p.evOtherTagsExpanded })); },
       evArticles: ARTICLES.filter(a => (a.relEvents || []).indexOf(ev.id) > -1).map(a => ({
         id: a.id, title: a.title, kindUp: a.kind.toUpperCase(), lead: a.lead,
         meta: a.date + ' · ' + a.author,
